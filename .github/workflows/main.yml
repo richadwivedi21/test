@@ -1,0 +1,39 @@
+name: dotnet-ci/cd
+
+on: 
+  push:
+   branches: [master]
+  workflow_dispatch: 
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4.2.2
+
+    - name: setup .net sdk
+      uses: actions/setup-dotnet@v3.4.2
+      with:
+         dotnet-version: '5.0.x'
+
+    - name: dotnet restore
+      run: dotnet restore HR.LeaveManagement.sln 
+
+    - name: dotnet build
+      run: dotnet build HR.LeaveManagement.sln
+
+    - name: dotnet test
+      run: dotnet test HR.LeaveManagement.Application.UnitTests/HR.LeaveManagement.Application.UnitTests.csproj --no-build --verbosity normal
+
+    - name: dotnet publish
+      run: dotnet publish HR.LeaveManagement.Api/HR.LeaveManagement.Api.csproj -c Release -o ./publish
+
+    - name: upload build artifacts
+      uses: actions/upload-artifact@v4.6.2
+      with:
+         name: artifact-dotnet
+         path: ./publish
+
+      
+  
